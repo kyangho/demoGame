@@ -1,6 +1,31 @@
 {
-    "character": {
+    "section1": {
         "files": [
+            {
+                "url": "assets/FB00_nyknck/FB001.png",
+                "type": "image",
+                "key": "FB001"
+            },
+            {
+                "url": "assets/FB00_nyknck/FB002.png",
+                "type": "image",
+                "key": "FB002"
+            },
+            {
+                "url": "assets/FB00_nyknck/FB003.png",
+                "type": "image",
+                "key": "FB003"
+            },
+            {
+                "url": "assets/FB00_nyknck/FB004.png",
+                "type": "image",
+                "key": "FB004"
+            },
+            {
+                "url": "assets/FB00_nyknck/FB005.png",
+                "type": "image",
+                "key": "FB005"
+            },
             {
                 "url": "assets/Adventurer Sprite Sheet v1.3.png",
                 "frameConfig": {
@@ -13,45 +38,6 @@
                 },
                 "type": "spritesheet",
                 "key": "player"
-            },
-            {
-                "url": "assets/Adventurer Sprite Sheet v1.3.png",
-                "frameConfig": {
-                    "frameWidth": 32,
-                    "frameHeight": 32,
-                    "startFrame": 0,
-                    "endFrame": 12,
-                    "spacing": 0,
-                    "margin": 0
-                },
-                "type": "spritesheet",
-                "key": "player_idle"
-            },
-            {
-                "url": "assets/Adventurer Sprite Sheet v1.3.png",
-                "frameConfig": {
-                    "frameWidth": 32,
-                    "frameHeight": 32,
-                    "startFrame": 13,
-                    "endFrame": 20,
-                    "spacing": 0,
-                    "margin": 0
-                },
-                "type": "spritesheet",
-                "key": "player_run"
-            },
-            {
-                "url": "assets/Adventurer Sprite Sheet v1.3.png",
-                "frameConfig": {
-                    "frameWidth": 32,
-                    "frameHeight": 32,
-                    "startFrame": 26,
-                    "endFrame": 35,
-                    "spacing": 0,
-                    "margin": 0
-                },
-                "type": "spritesheet",
-                "key": "player_attack_up"
             },
             {
                 "url": "assets/Adventurer Sprite Sheet v1.3.png",
@@ -78,33 +64,32 @@
                 },
                 "type": "spritesheet",
                 "key": "player_attack_straight"
-            }
-            ,
-            {
-                "url": "assets/Adventurer Sprite Sheet v1.3.png",
-                "frameConfig": {
-                    "frameWidth": 32,
-                    "frameHeight": 32,
-                    "startFrame": 65,
-                    "endFrame": 70,
-                    "spacing": 0,
-                    "margin": 0
-                },
-                "type": "spritesheet",
-                "key": "player_jump"
             },
             {
                 "url": "assets/Adventurer Sprite Sheet v1.3.png",
                 "frameConfig": {
                     "frameWidth": 32,
                     "frameHeight": 32,
-                    "startFrame": 78,
-                    "endFrame": 81,
+                    "startFrame": 26,
+                    "endFrame": 35,
                     "spacing": 0,
                     "margin": 0
                 },
                 "type": "spritesheet",
-                "key": "player_hurt"
+                "key": "player_attack_up"
+            },
+            {
+                "url": "assets/Adventurer Sprite Sheet v1.3.png",
+                "frameConfig": {
+                    "frameWidth": 32,
+                    "frameHeight": 32,
+                    "startFrame": 104,
+                    "endFrame": 107,
+                    "spacing": 0,
+                    "margin": 0
+                },
+                "type": "spritesheet",
+                "key": "player_climb"
             },
             {
                 "url": "assets/Adventurer Sprite Sheet v1.3.png",
@@ -118,20 +103,6 @@
                 },
                 "type": "spritesheet",
                 "key": "player_dead"
-            }
-            ,
-            {
-                "url": "assets/Adventurer Sprite Sheet v1.3.png",
-                "frameConfig": {
-                    "frameWidth": 32,
-                    "frameHeight": 32,
-                    "startFrame": 104,
-                    "endFrame": 107,
-                    "spacing": 0,
-                    "margin": 0
-                },
-                "type": "spritesheet",
-                "key": "player_climb"
             },
             {
                 "url": "assets/Adventurer Sprite Sheet v1.3.png",
@@ -151,6 +122,45 @@
                 "frameConfig": {
                     "frameWidth": 32,
                     "frameHeight": 32,
+                    "startFrame": 78,
+                    "endFrame": 81,
+                    "spacing": 0,
+                    "margin": 0
+                },
+                "type": "spritesheet",
+                "key": "player_hurt"
+            },
+            {
+                "url": "assets/Adventurer Sprite Sheet v1.3.png",
+                "frameConfig": {
+                    "frameWidth": 32,
+                    "frameHeight": 32,
+                    "startFrame": 0,
+                    "endFrame": 12,
+                    "spacing": 0,
+                    "margin": 0
+                },
+                "type": "spritesheet",
+                "key": "player_idle"
+            },
+            {
+                "url": "assets/Adventurer Sprite Sheet v1.3.png",
+                "frameConfig": {
+                    "frameWidth": 32,
+                    "frameHeight": 32,
+                    "startFrame": 65,
+                    "endFrame": 70,
+                    "spacing": 0,
+                    "margin": 0
+                },
+                "type": "spritesheet",
+                "key": "player_jump"
+            },
+            {
+                "url": "assets/Adventurer Sprite Sheet v1.3.png",
+                "frameConfig": {
+                    "frameWidth": 32,
+                    "frameHeight": 32,
                     "startFrame": 156,
                     "endFrame": 160,
                     "spacing": 0,
@@ -160,11 +170,42 @@
                 "key": "player_rolling"
             },
             {
+                "url": "assets/Adventurer Sprite Sheet v1.3.png",
+                "frameConfig": {
+                    "frameWidth": 32,
+                    "frameHeight": 32,
+                    "startFrame": 13,
+                    "endFrame": 20,
+                    "spacing": 0,
+                    "margin": 0
+                },
+                "type": "spritesheet",
+                "key": "player_run"
+            },
+            {
+                "url": "assets/Adventurer Sprite Sheet v1.3.png",
+                "frameConfig": {
+                    "frameWidth": 32,
+                    "frameHeight": 32,
+                    "startFrame": 117,
+                    "endFrame": 124,
+                    "spacing": 0,
+                    "margin": 0
+                },
+                "type": "spritesheet",
+                "key": "player_shoot"
+            },
+            {
                 "url": "assets/shadow.png",
                 "type": "image",
                 "key": "shadow"
             }
         ]
+    },
+    "meta": {
+        "app": "Phaser Editor 2D - Asset Pack Editor",
+        "contentType": "phasereditor2d.pack.core.AssetContentType",
+        "url": "https://phasereditor2d.com",
+        "version": 2
     }
-
 }
