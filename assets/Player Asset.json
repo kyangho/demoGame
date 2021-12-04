@@ -1,0 +1,182 @@
+{
+    "section1": {
+        "files": [
+            {
+                "url": "assets/images/Player Sprite Sheet.png",
+                "frameConfig": {
+                    "frameWidth": 32,
+                    "frameHeight": 32,
+                    "startFrame": 39,
+                    "endFrame": 48,
+                    "spacing": 0,
+                    "margin": 0
+                },
+                "type": "spritesheet",
+                "key": "player_attack_down_anims"
+            },
+            {
+                "url": "assets/images/Player Sprite Sheet.png",
+                "frameConfig": {
+                    "frameWidth": 32,
+                    "frameHeight": 32,
+                    "startFrame": 26,
+                    "endFrame": 35,
+                    "spacing": 0,
+                    "margin": 0
+                },
+                "type": "spritesheet",
+                "key": "player_attack_up_anims"
+            },
+            {
+                "url": "assets/images/Player Sprite Sheet.png",
+                "frameConfig": {
+                    "frameWidth": 32,
+                    "frameHeight": 32,
+                    "startFrame": 52,
+                    "endFrame": 61,
+                    "spacing": 0,
+                    "margin": 0
+                },
+                "type": "spritesheet",
+                "key": "player_attack_straight_anims"
+            },
+            {
+                "url": "assets/images/Player Sprite Sheet.png",
+                "frameConfig": {
+                    "frameWidth": 32,
+                    "frameHeight": 32,
+                    "startFrame": 65,
+                    "endFrame": 70,
+                    "spacing": 0,
+                    "margin": 0
+                },
+                "type": "spritesheet",
+                "key": "player_jump_anims"
+            },
+            {
+                "url": "assets/images/Player Sprite Sheet.png",
+                "frameConfig": {
+                    "frameWidth": 32,
+                    "frameHeight": 32,
+                    "startFrame": 78,
+                    "endFrame": 81,
+                    "spacing": 0,
+                    "margin": 0
+                },
+                "type": "spritesheet",
+                "key": "player_hurt_anims"
+            },
+            {
+                "url": "assets/images/Player Sprite Sheet.png",
+                "frameConfig": {
+                    "frameWidth": 32,
+                    "frameHeight": 32,
+                    "startFrame": 91,
+                    "endFrame": 97,
+                    "spacing": 0,
+                    "margin": 0
+                },
+                "type": "spritesheet",
+                "key": "player_death_anims"
+            },
+            {
+                "url": "assets/images/Player Sprite Sheet.png",
+                "frameConfig": {
+                    "frameWidth": 32,
+                    "frameHeight": 32,
+                    "startFrame": 104,
+                    "endFrame": 107,
+                    "spacing": 0,
+                    "margin": 0
+                },
+                "type": "spritesheet",
+                "key": "player_climb_anims"
+            },
+            {
+                "url": "assets/images/Player Sprite Sheet.png",
+                "frameConfig": {
+                    "frameWidth": 32,
+                    "frameHeight": 32,
+                    "startFrame": 117,
+                    "endFrame": 124,
+                    "spacing": 0,
+                    "margin": 0
+                },
+                "type": "spritesheet",
+                "key": "player_shoot_anims"
+            },
+            {
+                "url": "assets/images/Player Sprite Sheet.png",
+                "frameConfig": {
+                    "frameWidth": 32,
+                    "frameHeight": 32,
+                    "startFrame": 130,
+                    "endFrame": 135,
+                    "spacing": 0,
+                    "margin": 0
+                },
+                "type": "spritesheet",
+                "key": "player_castSpell_anims"
+            },
+            {
+                "url": "assets/images/Player Sprite Sheet.png",
+                "frameConfig": {
+                    "frameWidth": 32,
+                    "frameHeight": 32,
+                    "startFrame": 143,
+                    "endFrame": 150,
+                    "spacing": 0,
+                    "margin": 0
+                },
+                "type": "spritesheet",
+                "key": "player_climbDown_anims"
+            },
+            {
+                "url": "assets/images/Player Sprite Sheet.png",
+                "frameConfig": {
+                    "frameWidth": 32,
+                    "frameHeight": 32,
+                    "startFrame": 156,
+                    "endFrame": 160,
+                    "spacing": 0,
+                    "margin": 0
+                },
+                "type": "spritesheet",
+                "key": "player_rolling_anims"
+            },
+            {
+                "url": "assets/images/Player Sprite Sheet.png",
+                "frameConfig": {
+                    "frameWidth": 32,
+                    "frameHeight": 32,
+                    "startFrame": 0,
+                    "endFrame": 13,
+                    "spacing": 0,
+                    "margin": 0
+                },
+                "type": "spritesheet",
+                "key": "player_idle_anims"
+            },
+            {
+                "url": "assets/images/Player Sprite Sheet.png",
+                "frameConfig": {
+                    "frameWidth": 32,
+                    "frameHeight": 32,
+                    "startFrame": 13,
+                    "endFrame": 20,
+                    "spacing": 0,
+                    "margin": 0
+                },
+                "type": "spritesheet",
+                "key": "player_run_anims"
+            }
+        ]
+    },
+    "meta": {
+        "app": "Phaser Editor 2D - Asset Pack Editor",
+        "contentType": "phasereditor2d.pack.core.AssetContentType",
+        "url": "https://phasereditor2d.com",
+        "version": 2,
+        "showAllFilesInBlocks": false
+    }
+}

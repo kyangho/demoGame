@@ -1,22 +1,26 @@
-//Import các Scene cần dùng
 import MainScene from "./scenes/MainScene.js";
-
-//Cài đặt các thông số cho Game của mình
+import MathGame from "./scenes/MathGameScene.js";
+import Sharing from "./scenes/Sharing.js";
+import TestScene from "./scenes/TestScene.js";
 const config = {
+    width: 660,
+    height: 340,
+    backgroundColor: "#00000",
     type: Phaser.AUTO,
-    width:  "100%",
-    height:  "100%",
-    backgroundColor: '#000000',
-    physics: {
-        default: "arcade",
-        arcade: {
-            debug: false
-        }
+    scene: [MainScene, MathGame],
+    scale: {
+        zoom: 2,
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
     },
-    pixelArt:true,
-    scene: [MainScene]
+    physics: {
+        default: "matter",
+        matter: {
+            debug: true,
+            gravity: { y: 0 },
+        },
+    },
+    pixelArt: true,
 };
 
-//Khởi tạo game và runnnnnnnnnnnnn
-var game = new Phaser.Game(config);
-
+const game = new Phaser.Game(config);

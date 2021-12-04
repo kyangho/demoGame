@@ -1,23 +1,39 @@
-import Arrows from "./Arrows.js";
-export default class Player extends Phaser.GameObjects.Sprite {
-    /**
-     * 
-     * @param {Phaser.Scene} scene 
-     */
-    constructor(config) {
-        super(config.scene, config.x, config.y, config.key);
-        config.scene.physics.world.enable(this);
-        config.scene.add.existing(this);
+var spawnX;
+var spawnY;
 
-        this.body.setCollideWorldBounds(true);
-        this.setScale(3);
+var offsetY = 100;
+var maxspeed = 10;
+export default class Player extends Phaser.Physics.Matter.Sprite {
+    constructor(data) {
+        let { scene, x, y, texture, frame } = data;
+        super(scene.matter.world, x, y, texture, frame);
+        this.scene.add.existing(this);
 
-        this.speed = 5;
+        const { Body, Bodies } = Phaser.Physics.Matter.Matter;
+        this.playerCollider = Bodies.circle(this.x, this.y + 10, 6, {
+            isSensor: false,
+            label: "playerCollider",
+        });
+        this.playerSensor = Bodies.circle(this.x, this.y, 24, {
+            isSensor: true,
+            label: "playerSensor",
+        });
+        const compoundBody = Body.create({
+            parts: [this.playerCollider, this.playerSensor],
+            frictionAir: 0.35,
+        });
+        this.setExistingBody(compoundBody);
+        this.setFixedRotation();
+        this.setCollisionCategory(2);
+        spawnX = this.x;
+        spawnY = this.y;
+
+        this.speed = 1.7;
         this.hspd = 0;
         this.vspd = 0;
-        this.accel = 0.2;
-        this.kindOfAttack = '1';
-        this.state = 'idle';
+        this.accel = 0.5;
+        this.kindOfAttack = "1";
+        this.state = "idle";
 
         this.delayAttack = false;
         this.delayRolling = false;
@@ -26,99 +42,167 @@ export default class Player extends Phaser.GameObjects.Sprite {
         this.up = 0;
         this.right = 0;
 
-        var rect = new Phaser.Geom.Rectangle(config.x, config.y, 400, 400)
-        this.body.setSize(12, 16);
-        this.body.setOffset(this.width / 2 - 8, this.height / 2 - 2)
-        this.setDepth(1)
+        this.create();
+        this.setOrigin(0.5, 0.5)
     }
-    create(x, y) {
+
+    static preload(scene) {
+       
+    }
+    create(){
         this.anims.create({
-            key: "idle",
-            frames: this.anims.generateFrameNumbers('player_idle'),
+            key: "player_idle_anims",
+            frames: this.anims.generateFrameNumbers("player_idle_anims",{
+                start: 0,
+                end: 12,
+            }),
             frameRate: 8,
-            repeat: -1
+            repeat: -1,
         });
         this.anims.create({
-            key: "run",
-            frames: this.anims.generateFrameNumbers('player_run', { start: 13, end: 20 }),
+            key: "player_run_anims",
+            frames: this.anims.generateFrameNumbers("player_run_anims", {
+                start: 13,
+                end: 20,
+            }),
             frameRate: 8,
-            repeat: -1
+            repeat: -1,
         });
         this.attack_up = this.anims.create({
-            key: "attack-1",
-            frames: this.anims.generateFrameNumbers('player_attack_up', { start: 26, end: 35 }),
+            key: "player_attack_1_anims",
+            frames: this.anims.generateFrameNumbers("player_attack_up_anims", {
+                start: 26,
+                end: 35,
+            }),
             frameRate: 20,
-            repeat: 0
+            repeat: 0,
         });
         this.anims.create({
-            key: "attack-2",
-            frames: this.anims.generateFrameNumbers('player_attack_down', { start: 39, end: 48 }),
+            key: "player_attack_2_anims",
+            frames: this.anims.generateFrameNumbers("player_attack_down_anims", {
+                start: 39,
+                end: 48,
+            }),
             frameRate: 20,
-            repeat: 0
+            repeat: 0,
         });
         this.anims.create({
-            key: "attack-3",
-            frames: this.anims.generateFrameNumbers('player_attack_straight', { start: 52, end: 61 }),
+            key: "player_attack_3_anims",
+            frames: this.anims.generateFrameNumbers("player_attack_straight_anims", {
+                start: 52,
+                end: 61,
+            }),
             frameRate: 20,
-            repeat: 0
+            repeat: 0,
         });
         this.anims.create({
-            key: "rolling",
-            frames: this.anims.generateFrameNumbers('player_rolling', { start: 156, end: 160 }),
+            key: "player_rolling_anims",
+            frames: this.anims.generateFrameNumbers("player_rolling_anims", {
+                start: 156,
+                end: 160,
+            }),
             frameRate: 6,
-            repeat: 0
+            repeat: 0,
         });
         this.anims.create({
-            key: "shoot",
-            frames: this.anims.generateFrameNumbers('player_shoot', { start: 117, end: 124 }),
+            key: "player_shoot_anims",
+            frames: this.anims.generateFrameNumbers("player_shoot_anims", {
+                start: 117,
+                end: 124,
+            }),
             frameRate: 13,
-            repeat: 0
+            repeat: 0,
         });
-
-        this.shadow = this.scene.add.image(this.x - 5, this.y + this.height + 10, 'shadow').setAlpha(0.3, 0.3, 0.3, 0.3).setBlendMode("MULTIPLY").setDepth(0);
-        this.bullet = new Arrows(this.scene, 'arrow_fire');
+        this.anims.create({
+            key: "player_death_anims",
+            frames: this.anims.generateFrameNumbers("player_shoot_anims", {
+                start: 91,
+                end: 97,
+            }),
+            frameRate: 5,
+            repeat: 0,
+        });
     }
-    update(keys, time, delta) {
+    get velocity() {
+        return this.body.velocity;
+    }
+
+    update(time, delta) {
         let input = {
-            left: keys.left.isDown || this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).isDown,
-            right: keys.right.isDown || this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D).isDown,
-            down: keys.down.isDown || this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).isDown,
-            up: keys.up.isDown || this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W).isDown,
+            left:
+                this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT).isDown ||
+                this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A).isDown,
+            right:
+                this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT).isDown ||
+                this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D).isDown,
+            down:
+                this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN).isDown ||
+                this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).isDown,
+            up:
+                this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP).isDown ||
+                this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W).isDown,
             left_mouse: this.scene.input.activePointer.leftButtonDown(),
             right_mouse: this.scene.input.activePointer.rightButtonDown(),
-            shift: this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT).isDown
+            shift: this.scene.input.keyboard.addKey(
+                Phaser.Input.Keyboard.KeyCodes.SHIFT
+            ).isDown,
         };
-        this.movement(input);
-        this.attack(input);
-        this.shoot(input);
-        this.rolling(input);
-        this.shadowFollow(this.body.x, this.body.y);
+        if(this.state != "dead"){
+            this.movement(input);
+            this.rolling(input);
+            this.attack(input)
+        }
     }
+//================================================ANOTHER FUNCTION==================================================================
+    dead() {
+        this.state = "dead";
+        this.anims.play("player_death_anims", true).once("animationcomplete", () => {
+            this.setVisible(false);
+            this.setActive(false);
+            this.scene.time.addEvent({
+                delay: 5000,
+                callback: () => {
+                    this.setVisible(true);
+                    this.setActive(true);
+                    this.state = "idle";
+                    this.x = spawnX;
+                    this.y = spawnY;
+                    this.scene.sound.play("revive_sound", {
+                        volume: 0.5,
+                    });
+                },
+            });
+        })
 
-
-
-
+    }
     attack(input) {
         if (this.delayAttack) return;
         if (this.delayShoot) return;
         if (input.left_mouse) {
             this.flipByMouse();
-            this.state = 'attack';
+            this.state = "attack";
             this.hspd = 0;
             this.vspd = 0;
             this.delayAttack = true;
-            this.play(this.state + '-' + this.kindOfAttack, true).once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
-                this.delayAttack = false;
-                this.state = 'idle';
-                this.removeListener(Phaser.Animations.Events.ANIMATION_COMPLETE);
-                if (parseInt(this.kindOfAttack) >= 1 && parseInt(this.kindOfAttack) <= 3) {
-                    this.kindOfAttack = parseInt(this.kindOfAttack) + 1;
+            this.play("player_attack_" + this.kindOfAttack + "_anims", true).once(
+                Phaser.Animations.Events.ANIMATION_COMPLETE,
+                () => {
+                    this.delayAttack = false;
+                    this.state = "idle";
+                    this.removeListener(
+                        Phaser.Animations.Events.ANIMATION_COMPLETE
+                    );
+                    if (
+                        parseInt(this.kindOfAttack) >= 1 &&
+                        parseInt(this.kindOfAttack) <= 3
+                    ) {
+                        this.kindOfAttack = parseInt(this.kindOfAttack) + 1;
+                    }
+                    if (parseInt(this.kindOfAttack) > 3) {
+                        this.kindOfAttack = "1";
+                    }
                 }
-                if (parseInt(this.kindOfAttack) > 3) {
-                    this.kindOfAttack = '1';
-                }
-            })
-
+            );
         }
     }
 
@@ -128,22 +212,29 @@ export default class Player extends Phaser.GameObjects.Sprite {
 
         if (input.right_mouse) {
             this.flipByMouse();
-            this.state = 'shoot';
+            this.state = "shoot";
             this.delayShoot = true;
 
-            this.play('shoot', true).once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
-                this.delayShoot = false;
-                this.state = 'idle';
-                this.arrow('FB001');
-                this.removeListener(Phaser.Animations.Events.ANIMATION_COMPLETE);
-                if (parseInt(this.kindOfAttack) >= 1 && parseInt(this.kindOfAttack) <= 3) {
-                    this.kindOfAttack = parseInt(this.kindOfAttack) + 1;
+            this.play("player_shoot_anims", true).once(
+                Phaser.Animations.Events.ANIMATION_COMPLETE,
+                () => {
+                    this.delayShoot = false;
+                    this.state = "idle";
+                    this.arrow("FB001");
+                    this.removeListener(
+                        Phaser.Animations.Events.ANIMATION_COMPLETE
+                    );
+                    if (
+                        parseInt(this.kindOfAttack) >= 1 &&
+                        parseInt(this.kindOfAttack) <= 3
+                    ) {
+                        this.kindOfAttack = parseInt(this.kindOfAttack) + 1;
+                    }
+                    if (parseInt(this.kindOfAttack) > 3) {
+                        this.kindOfAttack = "1";
+                    }
                 }
-                if (parseInt(this.kindOfAttack) > 3) {
-                    this.kindOfAttack = '1';
-                }
-            })
-
+            );
         }
     }
 
@@ -151,8 +242,13 @@ export default class Player extends Phaser.GameObjects.Sprite {
         var dirX = this.scene.input.mousePointer.worldX - this.x;
         var dirY = this.scene.input.mousePointer.worldY - this.y;
         this.bullet.setDepth(2);
-        
-        this.bullet.fireBullet(this.x, this.y + this.body.halfWidth, this.scene.input.mousePointer.worldX, this.scene.input.mousePointer.worldY);
+
+        this.bullet.fireBullet(
+            this.x,
+            this.y + this.body.halfWidth,
+            this.scene.input.mousePointer.worldX,
+            this.scene.input.mousePointer.worldY
+        );
     }
 
     flipByMouse() {
@@ -162,74 +258,75 @@ export default class Player extends Phaser.GameObjects.Sprite {
             this.setFlipX(false);
     }
 
-    movement(input) {
-        if (this.state == 'attack' || this.state == 'shoot') {
+    movement(inputKeys) {
+        if (this.state == "attack" || this.state == "shoot") {
             return;
         }
-        if (this.state == 'rolling') {
+        if (this.state == "rolling") {
             return;
         }
-        var x = (input.right - input.left) * this.speed;
-        var y = (input.up - input.down) * this.speed;
-        this.up = input.up - input.down
+        if (this.state == "dead"){
+            return;
+        }
+        this.state = "run"
+        var x = (inputKeys.right - inputKeys.left) * this.speed;
+        var y = (inputKeys.up - inputKeys.down) * this.speed;
+        this.up = inputKeys.up - inputKeys.down;
         this.hspd = this.approach(this.hspd, x, this.accel);
         this.vspd = this.approach(this.vspd, y, this.accel);
         if (this.hspd > 0) {
             this.setFlipX(false);
-            this.play('run', true);
+            this.play("player_run_anims", true);
         } else if (this.hspd < 0) {
             this.setFlipX(true);
-            this.play('run', true);
+            this.play("player_run_anims", true);
         } else if (this.hspd == 0 && this.vspd != 0) {
-            this.play('run', true);
+            this.play("player_run_anims", true);
         }
         if (this.hspd == 0 && this.vspd == 0) {
-            this.play('idle', true);
+            this.play("player_idle_anims", true);
+            this.state = "idle"
         }
-        this.body.x += this.hspd;
-        this.body.y -= this.vspd;
-
+        this.x += this.hspd;
+        this.y -= this.vspd;
     }
 
     rolling(input) {
         if (this.delayRolling) return;
-        if (this.state != 'rolling' && input.shift) {
+        if (this.state != "rolling" && input.shift) {
             this.right = input.right - input.left;
         }
-        if (input.shift || this.state == 'rolling') {
-
-            var y = (this.up) * this.speed * 1.4;
+        if (input.shift || this.state == "rolling") {
+            var y = this.up * this.speed * 1.4;
             if (this.right == 0 && this.up == 0)
                 var x = (this.flipX ? -1 : 1) * this.speed * 1.4;
-            else
-                var x = (this.right) * this.speed * 1.4;
-            this.state = 'rolling';
+            else var x = this.right * this.speed * 1.4;
+            this.state = "rolling";
             this.hspd = this.approach(this.hspd, x, 1);
             this.vspd = this.approach(this.vspd, y, 1);
 
             this.body.x += this.hspd;
             this.body.y -= this.vspd;
 
-            this.play('rolling', true).once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
-                this.hspd = 0;
-                this.vspd = 0;
+            this.play("player_rolling_anims", true).once(
+                Phaser.Animations.Events.ANIMATION_COMPLETE,
+                () => {
+                    this.hspd = 0;
+                    this.vspd = 0;
 
-                this.delayRolling = true;
-                this.state = 'idle';
-                this.removeListener(Phaser.Animations.Events.ANIMATION_COMPLETE);
-                this.scene.time.delayedCall(1000, () => {
-                    this.delayRolling = false;
-                })
-            })
+                    this.delayRolling = true;
+                    this.state = "idle";
+                    this.removeListener(
+                        Phaser.Animations.Events.ANIMATION_COMPLETE
+                    );
+                    this.scene.time.delayedCall(1000, () => {
+                        this.delayRolling = false;
+                    });
+                }
+            );
         }
     }
-
-    shadowFollow(x, y) {
-        // this.shadow.x = x + this.width * 1.5 + (this.flipX ? 1 : -1) * 5;
-        // this.shadow.y = y + this.height * 3;
-        this.shadow.x = x + this.height / 1.5 + (this.flipX ? 1 : -1) * 5;
-        this.shadow.y = y + this.width + this.body.offset.y;
-    }
+    
     approach(a, b, amount) {
         if (a < b) {
             a += amount;
@@ -244,5 +341,4 @@ export default class Player extends Phaser.GameObjects.Sprite {
         }
         return a;
     }
-
 }

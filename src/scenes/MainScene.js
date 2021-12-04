@@ -1,181 +1,350 @@
-import { Mrpas } from "../../node_modules/mrpas/src/index.js";
+import Lantern from "../components/Lantern.js";
+import NPC from "../components/NPC.js";
 import Player from "../components/Player.js";
+import DataController from "../controller/DataController.js";
+import InputController from "../controller/InputController.js";
+
+//Get controller
+var inputController;
+
+//
+var point = 0;
+var score_text;
+
+//init variable map and layer
+var map;
+var items;
+var background;
+var midground;
+var coin;
+var trapLayer;
+
+//DayLight Variable
+var skyState;
+
+//depth layer
+const depthLayer = {
+    background: 0,
+    midground: 10,
+    trapLayer: 1,
+    player: 20, 
+}
+
+//tweens
+var cameraTween;
 export default class MainScene extends Phaser.Scene {
     constructor() {
         super({
-            key: 'MAINSCENE'
+            key: "MAINSCENE",
         });
     }
-    //Nơi để load các assets trước khi chúng được sử dụng
-    preload() {
-        this.load.pack('player-asset', 'assets/asset-pack.json');
-        this.load.tilemapTiledJSON('lobby', 'assets/lobby.json');
-        this.load.image('tileset', 'assets/Map_tiles.png');
-        this.load.audio('bg_sound', 'assets/sound.mp3');
-    }
-    //Nơi để thêm ra các đối tượng như image, text,... cần có trong Scene này
-    create() {
-        this.anims.create({
-            key: 'arrow_fire',
-            frames: [
-                { key: 'FB001' },
-                { key: 'FB002' },
-                { key: 'FB003' },
-                { key: 'FB004' },
-                { key: 'FB005' }
-            ],
-            frameRate: 10,
-            repeat: -1
-        })
-        this.input.mouse.disableContextMenu();
 
-        // this.add.image(200, 200, 'shadow').setAlpha(0.3, 0.3, 0.3, 0.3).setBlendMode("MULTIPLY");
-        this.map = this.make.tilemap({
-            key: 'lobby',
-            tileHeight: 32,
-            tileWidth: 32
-        });
-        this.tilesets = [
-            this.map.addTilesetImage('Map_tiles', 'tileset')
-        ];
-        this.layer = {
-            "ground": this.map.createLayer("ground", this.tilesets),
-            "tier_1": this.map.createLayer("tier 1", this.tilesets).setDepth(1)
-        }
-        this.fov = new Mrpas(this.game.config.maxWidth, this.game.config.maxHeight, (x, y) => {
-            const tile = this.layer["ground"].getTileAt(x, y);
-            return tile && !tile.collides
-        })
+    preload() { 
+        Player.preload(this);
 
+        this.load.image("tiles", "assets/images/RPG Nature Tileset.png");
+        // this.load.tilemapTiledJSON("map", "assets/map_1.json");
+        this.load.tilemapTiledJSON("map", "assets/images/map.json");
 
-
-        // let tileset = map.addTilesetImage('tileset-atlas', 'tileset')
-
-        // let groudLayer = map.createLayer('ground', [tileset], 0, 0);
-        // this.physics.world.addCollidera
-        this.player = new Player(
+        this.load.image("coin", "assets/images/Liem si.png");
+        this.load.image("mask", "assets/images/mask1.png");
+        this.load.spritesheet(
+            "lantern",
+            "assets/images/Lantern Spritesheet.png",
             {
-                scene: this,
-                x: 500,
-                y: 400
-            });
-        this.keys = {
-            up: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP),
-            left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT),
-            right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT),
-            down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN)
-        };
-        this.player.create(500, 400 );
-        this.physics.world.addCollider(this.player, this.createCollisionGroup(this.layer["tier_1"].layer));
-        var background_sound = this.sound.add('bg_sound',{
-            volume: 0.3,
-            loop: true
-        })
-        background_sound.play();
+                frameWidth: 32,
+                frameHeight: 32,
+                startFrame: 0,
+                endFrame: 6,
+            }
+        );
+        this.load.pack("player-asset", "assets/Player Asset.json");
+        this.load.audio("background_sound", "assets/Mad_Hatter_Tea_Party.mp3");
+        this.load.audio("collect_coin_sound", "assets/couin.mp3");
+        this.load.audio(
+            "death_sound",
+            "assets/lego-yoda-death-sound-effect.mp3",
+        );
+        this.load.audio(
+            "revive_sound",
+            "assets/gta-san-andreas-ah-shit-here-we-go-again.mp3",
+        );
+
+        //load font
+        this.load.bitmapFont('big_font', 'assets/font/big_font.png', 'assets/font/big_font.xml');
     }
-    //Phương thức update sẽ được gọi mỗi lần cho mỗi frame của Scene
-    //Đây cũng là nơi để bạn thực hiện hoá các ý tưởng của mình vào game
-    update(time, delta) {
-        this.player.update(this.keys, time, delta);
-        this.computeFOV();
+    create() {
+    //load font
+        // this.add.bitmapText(100, 100, 'big_font', 'Z123456789').setDepth(100);
+    //Load data
+        var dataController = new DataController(this);
+        skyState = dataController.sceneData.skyState;
+        
+    //Load map
+        this.loadMap();
+    
+    //Cameras
+        this.cameras.main.setScene(this);
+        this.cameras.main.setBounds(0, 0,map.widthInPixels, map.heightInPixels, true);
+
+    //Get input
+        inputController = new InputController(this);
+        this.inputKeys = inputController.getInputKeysDown();
+
+    //load npc
+        this.loadObjectNPC();
+        
+    //Init player
+        this.player = new Player({
+            scene: this,
+            x: 97,
+            y: 100,
+        });
+        this.player.inputKeys = this.inputKeys;
+
+    //text score
+        score_text = this.add.text(10, 10, "Liêm sỉ: " + point, {
+            fontFamily: "MainFont"
+        }).setShadowFill(true).setResolution(4);
+
+    //check Collision
+        this.checkCollision();
+    //init Lantern
+        this.lantern = new Lantern({
+            scene: this,
+            x: this.player.x,
+            y: this.player.y,
+            key: "lantern",
+        });
+        this.lantern.create(this.scene);
+        this.lantern.setPipeline("Light2D");
+        //Day night system
+        this.skyState = skyState.night;
+        this.lights.ambientColor = skyState.night;
+
+    //Create tweens Timeline
+        var timeline = dataController.sceneData.createTimelineSkyState();
+
+    //Last config
+        this.lights.enable();
+
+        //set depth
+        background.setDepth(depthLayer.background);
+        midground.setDepth(depthLayer.midground);
+        trapLayer.setDepth(depthLayer.trapLayer);
+        this.player.setDepth(depthLayer.player);
+
+        //Set pipiline "Light 2D"
+        background.setPipeline("Light2D");
+        this.player.setPipeline("Light2D");
+        trapLayer.setPipeline("Light2D");
+        coin.setPipeline("Light2D");
+        midground.setPipeline("Light2D");
+
+        this.swapDepth();
+
+        //Const category collision
+        const CATEGORY_PLAYER = 0b0001
+        const CATEGORY_MIDGROUND = 0b0010
+
+        this.player.setCollisionCategory(CATEGORY_PLAYER);
+        this.player.setOnCollideWith(CATEGORY_MIDGROUND);
+
+        // midground.setCollisionCategory(CATEGORY_MIDGROUND);
+        // midground.setOnCollideWith(CATEGORY_PLAYER);
+
+        this.player.collisionFilter = { group: CATEGORY_MIDGROUND }
+        
+        this.input.on('pointerdown', function (pointer) {
+            console.log("mouse: " + pointer.x + ' ' + pointer.y);
+        }, this);
+        
     }
 
-    createCollisionGroup(layer) {
-        const walls = this.physics.add.group();
-        layer.data.forEach(row => {
-            row.forEach(col => {
-                col?.getCollisionGroup()?.objects.forEach(e => {
-                    const s = this.physics.add.sprite(
-                        col.pixelX + e.x + layer.x - col.width / 2,
-                        col.pixelY + e.y + layer.y - col.height / 2,
-                        null, null)
-                        .setOrigin(0, 0)
-                        .setSize(e.width, e.height)
-                        .setPushable(false)
-                        .setImmovable()
-                        .setOffset(16, 16)
-                        .setVisible(false)
-                        .setActive(true);
-                    walls.add(s);
-                });
+    update(time, delta) {
+        this.inputKeys = inputController.getInputKeysDown();
+        this.player.update();
+        this.lantern.update(this.player.x, this.player.y);
+        
+        cameraTween = this.tweens.add({
+            targets: this.cameras.main,
+            // scrollX: this.player.x - this.scale.gameSize.width / 2,
+            scrollX: (target, targetKey, value, targetIndex, totalTargets, tween) => { 
+                return this.player.x - this.scale.gameSize.width / 2;   
+            },
+            scrollY: (target, targetKey, value, targetIndex, totalTargets, tween) => { 
+                return this.player.y - this.scale.gameSize.height / 2;   
+            },
+            ease: "Linear",
+            duration: 500,
+        });
+
+    }
+
+
+//================================================ANOTHER FUNCTION==================================================================
+    loadMap(){
+        //
+            // var answer = this.add.image(23, 23, "image");
+            // answer.setInteractive().on("pointerdown", () => {
+            //     console.log("correct answer");
+            // })
+            this.add.text(30, 30, "text").setText
+        //create map
+        map = this.make.tilemap({ key: "map" });
+
+        //get tileset ground
+        const tileset = map.addTilesetImage(
+            "RPG Nature Tileset",
+            "tiles",
+            32,
+            32,
+            0,
+            0
+        );
+        //var collide object
+        var collidesObject = map.getObjectLayer("collides");
+        collidesObject.objects.forEach(object => {
+            
+            var body = this.matter.add.rectangle(object.x + object.width / 2, object.y + object.height / 2, object.width, object.height, {
+                isSensor: false,
+                isStatic: true,
+            })
+        })
+        //get tileset items
+        items = map.addTilesetImage("Liem si", "coin", 32, 32, 0, 0);
+        
+        //create layer 1
+        background = map.createLayer("background", tileset, 0, 0);
+        this.matter.world.convertTilemapLayer(background);
+
+        //create layer 2
+        midground = map.createLayer("midground", tileset, 0, 0);
+        midground.setCollisionByProperty({ collides: true });
+        midground.setCollisionBetween(21, 24, true);
+        midground.setCollisionByProperty()
+        this.matter.world.convertTilemapLayer(midground);
+        //set label is "midground" for tile in trap layer
+        midground.forEachTile(function (tile) {
+            if (tile.collideDown) {
+                
+                tile.physics.matterBody.setCollisionGroup(0b0010);
+                // tile.physics.matterBody.collisionFilter.category = 0b0010;
+                tile.physics.matterBody.body.label = "midground";
+            }
+        });
+
+        //create trap layer
+        trapLayer = map.createLayer("trapsLayer", tileset, 0, 0);
+        trapLayer.setCollisionByProperty({ collides: true });
+        trapLayer.setCollisionBetween(2, 6, true);
+        this.matter.world.convertTilemapLayer(trapLayer);
+
+        //set label is "trap" for tile in trap layer
+        trapLayer.forEachTile(function (tile) {
+            if (tile.collideDown) {
+                tile.physics.matterBody.body.label = "trap";
+                tile.physics.matterBody.body.isSensor = true;
+            }
+        });
+        trapLayer.setOrigin(0);
+
+        //create items layer
+        coin = map.createLayer("itemsLayer", items, 0, 0);
+        coin.setCollisionByProperty({ collides: true });
+        coin.setCollisionBetween(0, 10000, true);
+        this.matter.world.convertTilemapLayer(coin);
+
+        //set label is "coin" for coin tile in items layer
+        coin.forEachTile(function (tile) {
+            if (tile.collideDown) {
+                tile.physics.matterBody.body.label = "coin";
+                tile.physics.matterBody.body.isSensor = true;
+            }
+        });
+
+    }
+
+    loadObjectNPC(){
+        var npcs = map.getObjectLayer("npc");
+        var npc_grammar;
+        npcs.objects.forEach(object => {
+            if (object.name = "npc_grammar"){
+                npc_grammar = new NPC({
+                    scene: this,
+                    x: object.x + object.width / 2,
+                    y: object.y + object.height / 2,
+                })
+            }
+        })
+    }
+
+    checkCollision(){
+    //Check collision with coin
+        this.matter.world.on("collisionstart", (event, bodyA, bodyB) => {
+            var p;
+            var tmp = bodyA;
+            bodyA = bodyA.label == "coin" ? bodyA : bodyB;
+            bodyB = bodyB.label == "playerCollider" ? bodyB : tmp;
+            if (bodyA.label == "coin" && bodyB.label == "playerCollider") {
+                point++;
+                score_text.text = "Liêm sỉ: " + point;
+                this.sound.play("collect_coin_sound");
+                p = map.worldToTileXY(bodyA.position.x, bodyA.position.y, true);
+                map.getTileAt(p.x, p.y, true, coin).physics.matterBody.destroy();
+                map.removeTileAt(p.x, p.y, true, false, coin);
+            }
+        });
+    
+    //Check conllision player with trap
+        this.matter.world.on("collisionstart", (event, bodyA, bodyB) => {
+            if (
+                (bodyA.label == "trap" && bodyB.label == "playerCollider") ||
+                (bodyB.label == "trap" && bodyA.label == "playerCollider")
+            ) {
+                this.player.dead();
+                this.sound.play("death_sound");
+            }
+        });
+    }
+
+    swapDepth(){
+        this.matter.world.on("collisionactive", (event, bodyA, bodyB) => {
+            event.pairs.forEach(pair => {
+                if (pair.bodyA.label == "midground" && pair.bodyB.label == "playerSensor"
+                ||  pair.bodyA.label == "playerSensor" && pair.bodyB.label == "midground"){
+                    var offsetY = 3;
+                    if (pair.bodyA.position.y > pair.bodyB.position.y + offsetY){
+                        this.player.setDepth(depthLayer.background);
+                    }else if(pair.bodyA.position.y < pair.bodyB.position.y + offsetY){
+                        this.player.setDepth(depthLayer.player);
+                    }
+                }
             });
         });
-        return walls;
+        // midground.forEachTile(function (tile) {
+        //     var offsetY = 2;
+        //     if (tile.collideDown) {
+        //         this.matter.overlap(this.player, this.player, () => {
+        //             if (this.player.y > tile.y + offsetY){
+        //                 this.player.setDepth(depthLayer.background);
+        //             }else if(this.player.y < tile.y + offsetY){
+        //                 this.player.setDepth(depthLayer.player);
+        //             }
+        //         })
+        //     }
+        // });
     }
+
+    getRootBody (body)
+    {
+        if (body.parent === body) { return body; }
+        while (body.parent !== body)
+        {
+            body = body.parent;
+        }
+        return body;
+    }
+
     
-    computeFOV() {
-        if (!this.fov || !this.map || !this.layer["ground"] || !this.player) {
-            return
-        }
-        // get camera view bounds
-        const camera = this.cameras.main
-        const bounds = new Phaser.Geom.Rectangle(
-            this.map.worldToTileX(camera.worldView.x) - 1,
-            this.map.worldToTileY(camera.worldView.y) - 1,
-            this.map.worldToTileX(camera.worldView.width) + 2,
-            this.map.worldToTileX(camera.worldView.height) + 3
-        )
-
-        // set all tiles within camera view to invisible
-        for (let y = bounds.y; y < bounds.y + bounds.height; y++) {
-            for (let x = bounds.x; x < bounds.x + bounds.width; x++) {
-                if (y < 0 || y >= this.map.height || x < 0 || x >= this.map.width) {
-                    continue
-                }
-                
-                const tile = this.layer["ground"].getTileAt(x, y)
-                if (!tile) {
-                    continue
-                }
-                
-                tile.alpha = 1;
-                tile.tint = 0x404040
-                // tile.tint = 0xffffff
-
-            }
-        }
-        
-        const px = this.map.worldToTileX(this.player.x)
-        const py = this.map.worldToTileY(this.player.y)
-        
-        // compute fov from player's position
-        const PI = 3.1415926535;
-        this.fov.compute(
-            px,
-            py,
-            6,
-            (x, y) => {
-                for (let y1 = y - r; y1 < y + r; y1++) {
-                    for (let x1 = x - r; x1 < x + r; x1++) {
-                        const tile = this.layer["ground"].getTileAt(x1, y1)
-                        if (!tile) {
-                            return false
-                        }
-                        return tile.tint = 0xffffff
-                    }
-                }
-            },
-            (x, y) => {
-                var r = 6;
-                for (let y1 = y - r; y1 < y + r; y1++) {
-                    for (let x1 = x - r; x1 < x + r; x1++) {
-                        if (y1 < 0 || y1 >= this.map.height || x1 < 0 || x1 >= this.map.width) {
-                            continue
-                        }
-        
-                        const tile = this.layer["ground"].getTileAt(x1, y1)
-                        if (!tile) {
-                            continue
-                        }
-        
-                        const d = Phaser.Math.Distance.Between(py, px, y1, x1)
-                        const alpha = Math.min(2 - d / 4.5, 1)
-
-                        tile.alpha = alpha
-                        tile.tint = 0xffffff
-                    }
-                }
-            }
-        )
-    }
 }
