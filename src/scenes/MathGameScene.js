@@ -1,6 +1,6 @@
 var questionNumber = 2;
 var question;
-var totalQuestion = 4;
+var totalQuestion = 5;
 var curQuestion = 0;
 
 var circleGreen;
@@ -9,7 +9,7 @@ var crossRed = [];
 var quenstionText = [];
 var answer = [];
 
-var time = 10;
+var time = 7;
 var timeEvent;
 
 var isNext = false;
@@ -28,13 +28,11 @@ export default class MathGame extends Phaser.Scene{
     
     create(){
         // this.events.once("pause", () => {
-        //     if (isGameOver){
-        //         console.log("shutdown")
-        //         isGameOver = false;
-        //         this.scene.switch("MAINSCENE")
-        //     }
+        //     console.log("shutdown")
+        //     isGameOver = false;
+        //     this.scene.restart();
         // });
-
+        
         var marginLeft = 10;
         var gap = 10;
         var graphics = this.add.graphics();
@@ -69,7 +67,7 @@ export default class MathGame extends Phaser.Scene{
 
     }   
 
-    update(){
+    update(){       
         
     }
 
@@ -240,10 +238,11 @@ export default class MathGame extends Phaser.Scene{
     }
 
     gameOver(){
+        // this.scene.restart()
         isGameOver = true;
         // this.scene.pause("MATHSCENE")
         // this.scene.restart();   
-        this.scene.switch("MAINSCENE")
+        this.scene.stop()
     }
 
 }

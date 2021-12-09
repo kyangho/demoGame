@@ -3,6 +3,8 @@ var spawnY;
 
 var offsetY = 100;
 var maxspeed = 10;
+
+var reviveTime = 2000;
 export default class Player extends Phaser.Physics.Matter.Sprite {
     constructor(data) {
         let { scene, x, y, texture, frame } = data;
@@ -22,6 +24,7 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
             parts: [this.playerCollider, this.playerSensor],
             frictionAir: 0.35,
         });
+        console.log(this)
         this.setExistingBody(compoundBody);
         this.setFixedRotation();
         this.setCollisionCategory(2);
@@ -44,6 +47,8 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
 
         this.create();
         this.setOrigin(0.5, 0.5)
+
+        this.setIgnoreGravity(true)
     }
 
     static preload(scene) {
@@ -115,9 +120,18 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
         });
         this.anims.create({
             key: "player_death_anims",
-            frames: this.anims.generateFrameNumbers("player_shoot_anims", {
+            frames: this.anims.generateFrameNumbers("player_death_anims", {
                 start: 91,
                 end: 97,
+            }),
+            frameRate: 5,
+            repeat: 0,
+        });
+        this.anims.create({
+            key: "player_hurt_anims",
+            frames: this.anims.generateFrameNumbers("player_hurt_anims", {
+                start: 78,
+                end: 81,
             }),
             frameRate: 5,
             repeat: 0,
@@ -156,25 +170,273 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
 //================================================ANOTHER FUNCTION==================================================================
     dead() {
         this.state = "dead";
+        this.scene.sound.play("deathSound");
         this.anims.play("player_death_anims", true).once("animationcomplete", () => {
             this.setVisible(false);
             this.setActive(false);
-            this.scene.time.addEvent({
-                delay: 5000,
-                callback: () => {
-                    this.setVisible(true);
-                    this.setActive(true);
-                    this.state = "idle";
-                    this.x = spawnX;
-                    this.y = spawnY;
-                    this.scene.sound.play("revive_sound", {
-                        volume: 0.5,
-                    });
-                },
-            });
+            this.revivalPlayer();
         })
 
     }
+    deadBounce() {
+        this.state = "dead";
+        this.scene.sound.play("deathSound");
+
+        var originPlayer = this;
+
+        this.anims.play("player_hurt_anims");
+        this.anims.pause(this.anims.currentAnim.frames[3]);
+
+        this.deactiveBody()
+        console.log(this.body)
+        var bouceTween = this.scene.tweens.add({
+            targets: this,
+            props:{
+                x: {
+                    value: this.x + 100,
+                    duration: 1000,
+                    ease: "Linear",
+                },
+                y: {
+                    value: this.scene.renderer.height / 2,
+                    duration: 1000,
+                    ease: "Linear", 
+                },
+                scale: {
+                    value: 14,
+                    duration: 1000,
+                    ease: "Linear"
+                },
+                angle: {
+                    value: 360 * 10,
+                    duration: 1000,
+                    ease: "Sine"
+                }
+            }
+        }).once("complete", () => {
+            this.scene.cameras.main.stopFollow();
+            this.scene.tweens.add({
+                targets: this,
+                y: this.scene.cameras.main.height + this.height * 5,
+                duration: 2000,
+                ease: "Linear"
+            }).once("complete", () => {
+                this.setActive(false);
+                this.setVisible(false);
+                this.scale = bouceTween.data[2].start;
+                this.revivalPlayer();
+            })
+        })
+    }
+
+    deadByLam(){
+        var offsetX = 20;
+        var offsetY = -20
+        if (this.state == "dead"){
+            return;
+        }
+        this.state = "dead";
+
+        this.anims.play("player_hurt_anims");
+        this.anims.pause(this.anims.currentAnim.frames[3]);
+        this.deactiveBody();
+        var sound = this.scene.sound.add("headache");
+        var video = this.scene.add.video(this.x, this.y + offsetY, "aLam_video").setScale(0.3, 0.3).play(true);
+        var video_bg = this.scene.add.video(this.scene.cameras.main.x + this.scene.cameras.main.width / 2
+                                          , this.scene.cameras.main.y + this.scene.cameras.main.height / 2
+                                          , "highBackground").setScale(3, 3).play().setVolume(0).setDepth(30).setAlpha(0.05);
+        var flipX = 1 * 2;
+        var randomNumber = 30;
+        var lamTweenX = this.x;
+        var lamTweenFlipX = 1;
+        var lamTween = this.scene.tweens.add({
+            targets: video,
+            x: video.x + randomNumber * flipX,
+            y: video.y + Math.floor(Math.random() * randomNumber * flipX),
+            ease: "Linear",
+            loop: 5,
+            duration: 1000,
+            onLoop: () => {
+                lamTweenFlipX = -lamTweenFlipX;
+                lamTween.data[0].end = lamTween.data[0].start + randomNumber * lamTweenFlipX;
+                lamTween.data[1].end = video.y + Math.floor(Math.random() * randomNumber) * lamTweenFlipX;
+            }
+        })
+
+        this.scene.time.delayedCall(4000, () => {
+            var tween = this.scene.tweens.add({
+                targets: this,
+                x: this.x + flipX,
+                repeat: -1,
+                duration: 50,
+                onRepeat: () => {
+                    flipX = -flipX;
+                    tween.data[0].end = this.x + flipX;
+                }
+            })
+            sound.play();
+            sound.once("complete", () => {
+                this.scene.sound.play("balloonDeflating");
+                this.scene.tweens.add({
+                    targets: this,
+                    y: this.y - this.scene.cameras.main.height,
+                    ease: "Linear",
+                    duration: 1000
+                }).once("complete", () => {
+                    this.scene.sound.play("balloonPop");
+                    this.setActive(false);
+                    this.setVisible(false);
+                    this.revivalPlayer();
+                    video.destroy();
+                    video_bg.destroy();
+                    tween.remove();
+                })
+            })
+        })
+    }
+
+    deadByCheemsBonk(){
+        if (this.state == "dead"){
+            return;
+        }
+        this.state = "dead";
+        console.log(this.state)
+        this.anims.play("player_idle_anims");
+        this.anims.pause(this.anims.currentAnim.frames[2]);
+        this.setActive(false);
+        this.deactiveBody();
+        var offsetY = -30;
+        var offsetX = -120;
+        var angle = 45;
+
+        var cheems = {
+            image: this.scene.add.image(this.x + offsetX, this.y + offsetY, "cheemsBonk_image").setOrigin(0.2, 0.8).setDepth(100),
+            sound: this.scene.sound.add("cheemsBonk_audio"),
+        };
+        if (this.x < 200){
+            cheems.image.setFlipX(true);
+            angle = -angle;
+            cheems.image.setOrigin(0.8, 0.8)
+            cheems.image.setX(this.x + cheems.image.width + offsetX / 2)
+        }
+        cheems.sound.play();
+        this.scene.time.delayedCall(900, () => {
+            this.scene.tweens.add({
+                targets: cheems.image,
+                angle: angle,
+                duration: 100,
+            }).once("complete", () => {
+                this.setScale(1, 0.4);
+                this.scene.tweens.add({
+                    targets: cheems.image,
+                    angle: 0,
+                    duration: 1000,
+                }).once("complete", () => {
+                    this.setVisible(false);
+                    this.setScale(1, 1);
+                    cheems.image.destroy();
+                    cheems.sound.destroy();
+                    this.revivalPlayer();
+                })
+            })
+        })
+    }
+
+    deadBySimp(){
+        if (this.state == "dead"){
+            return;
+        }
+        this.state = "dead";
+        this.anims.play("player_idle_anims");
+        this.anims.pause(this.anims.currentAnim.frames[2]);
+        this.deactiveBody();
+
+        this.setFlipX(false);
+        var heart = this.scene.add.image(this.x, this.y + 6, "heart").setScale(0.5).setDepth(100);
+        var chold = this.scene.add.video(this.x + 90, this.y, "chold").setScale(0.4).setDepth(90).play();
+
+        var heartOffset = {
+            x: 10,
+            y: -6,
+        }
+
+        if (this.x > 800){
+            heartOffset.x = -heartOffset.x;
+            chold.x = this.x - 90;
+        }
+        this.scene.tweens.add({
+            targets: heart,
+            x: heart.x + heartOffset.x,
+            y: heart.y + heartOffset.y,
+            scaleX: 0.3,
+            scaleY: 1,
+            ease: "Sine.easeOut",
+            duration: 500,
+            loop: 5,
+            yoyo: true,
+        }).once("complete", () => {
+            this.scene.tweens.add({
+                targets: heart,
+                x: heart.x + heartOffset.x,
+                y: heart.y + heartOffset.y,
+                scaleX: 0.3,
+                scaleY: 1,
+                ease: "Sine.easeOut",
+                duration: 200,
+                loop: 7,
+                yoyo: true,
+            }).once("complete", () => {
+                this.scene.sound.play("balloonPop");
+                heart.destroy();
+                this.anims.resume();
+                this.anims.play("player_death_anims", true).once("animationcomplete", () => {
+                    this.setVisible(false);
+                    this.setActive(false);
+                    this.revivalPlayer();
+                    chold.destroy();
+                })
+            })
+        })
+    }
+
+    deadByChimo(){
+        if (this.state == "dead"){
+            return;
+        }
+        this.state = "dead";
+        this.anims.play("player_hurt_anims");
+        this.anims.pause(this.anims.currentAnim.frames[3]);
+        this.deactiveBody();
+        this.setFlipX(false);
+        var chimo = this.scene.add.video(this.x, this.y, "hieuchimo").setOrigin(0.85, 0.80).setScale(0.4).setDepth(19).play();
+
+        var playerOffset = {
+            x: 23,
+            y: -10,
+        }
+        this.scene.time.delayedCall(3760, () => {
+            var chimoTween = this.scene.tweens.add({
+                targets: this,
+                x: this.x + playerOffset.x,
+                y: this.y + playerOffset.y,
+                ease: "Power2",
+                duration: 150,
+                yoyo: true,
+                loop: 21,
+            })
+            chimo.once("complete", () => {
+                chimoTween.remove();
+                chimo.destroy();
+                this.anims.play("player_death_anims", true).once("animationcomplete", () => {
+                    this.setVisible(false);
+                    this.setActive(false);
+                    this.revivalPlayer();
+                })
+            })
+        })
+
+    }
+
     attack(input) {
         if (this.delayAttack) return;
         if (this.delayShoot) return;
@@ -340,5 +602,38 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
             }
         }
         return a;
+    }
+
+    deactiveBody(){
+        this.body.isSleeping = true;
+        this.body.isSensor = true;
+    }
+
+    activeBody(){
+        this.body.isSleeping = false;
+        this.body.isSensor = false;
+    }
+
+    revivalPlayer(){
+        if (this.state == "revival"){
+            return;
+        }
+        this.scene.scene.restart();
+        this.scene.time.addEvent({
+            delay: reviveTime,
+            callback: () => {
+                this.state = "revival";
+                this.setVisible(true);
+                this.setActive(true);
+                this.activeBody();
+                this.scene.cameras.main.startFollow(this, false, 0.05, 0.05);
+                this.state = "idle";
+                this.x = spawnX;
+                this.y = spawnY;
+                this.scene.sound.play("revivalSound", {
+                    volume: 0.5,
+                });
+            },
+        });
     }
 }

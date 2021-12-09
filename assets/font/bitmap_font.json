@@ -11,7 +11,7 @@
     },
     "meta": {
         "version": "1.0",
-        "image": "big_font.png",
+        "image": "bigFont.png",
         "format": "RGBA8888",
         "size": {"w":176,"h":174},
         "scale": "1"

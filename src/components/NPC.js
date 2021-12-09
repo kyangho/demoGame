@@ -32,16 +32,26 @@ export default class NPC extends Phaser.Physics.Matter.Sprite{
 
         this.isPressE = false;
 
-        var buttonInteractive = this.scene.add.bitmapText(this.x, this.y, 'big_font', 'E').setDepth(100).setOrigin(0.5 ,0.5).setScale(0.5).setVisible(false);
+        var buttonInteractive = this.scene.add.bitmapText(this.x, this.y, 'bigFont', 'E').setDepth(100).setOrigin(0.5 ,0.5).setScale(0.5).setVisible(false);
         this.scene.matter.world.on("collisionactive", (event, bodyA, bodyB) => {
             event.pairs.forEach(pair => {
                 if (pair.bodyA.label == "npcSensor" && pair.bodyB.label == "playerSensor"
                 ||  pair.bodyA.label == "playerSensor" && pair.bodyB.label == "npcSensor"){
                     if (this.scene.input.keyboard.addKey("E").isDown){
                         this.isPressE = true;
-                        
                         // this.scene.scene.switch("MATHSCENE");
-                        this.scene.scene.switch("MATHSCENE");
+                        // this.scene.scene.stop("MATHSCENE")
+                        // this.scene.scene.resume("MATHSCENE")
+                        // this.scene.scene.resume("MATHSCENE")
+                        // this.scene.scene.remove("MATHSCENE")
+                    }
+                    if (this.scene.input.keyboard.addKey("E").isUp){
+                        if(this.isPressE){
+                            // this.scene.restartScene("MATHSCENE");
+                            this.isPressE = false;
+                            // this.scene.scene.stop("MATHSCENE")
+                            this.scene.scene.launch("MATHSCENE")
+                        }
                     }
                     var tmp = pair.bodyA;
                     pair.bodyA = pair.bodyA.label == "npcSensor" ? pair.bodyA : pair.bodyB;
@@ -68,6 +78,7 @@ export default class NPC extends Phaser.Physics.Matter.Sprite{
         this.setInteractive().on('pointerdown', function(pointer, localX, localY, event){
             console.log("dont touch me")
         });
+
     }
 
     create(){

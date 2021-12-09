@@ -43,7 +43,7 @@ export default class Lantern extends Phaser.Physics.Matter.Sprite {
         if (state == "DISABLE") {
             return;
         }
-        this.y = this.y + offsetY;
+        this.y = this.y;
         this.scene.tweens.add({
             targets: this,
             x: x,
@@ -51,7 +51,7 @@ export default class Lantern extends Phaser.Physics.Matter.Sprite {
             ease: "Linear",
             duration: 200,
         });
-        this.spotLight.update(x, y + offsetY);
+        this.spotLight.update(x, y);
     }
 
     hide() {

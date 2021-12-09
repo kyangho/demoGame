@@ -1,10 +1,10 @@
 <font>
 	<info face="F:\4_JS\1_Coding_Project\3_noHope
-oHopeAdventure\assets\font\big_font" size="80" />
+oHopeAdventure\assets\font\bigFont" size="80" />
 	<common lineHeight="90" scaleW="88" scaleH="87" pages="1" />
 	<pages>
 		<page id="0" file="F:\4_JS\1_Coding_Project\3_noHope
-oHopeAdventure\assets\font\big_font.png" />
+oHopeAdventure\assets\font\bigFont.png" />
 	</pages>
 	<chars count="96">
 		<char id="65" x="70" y="29" width="28" height="28" xoffset="0" yoffset="0" xadvance="29" letter="A"/><!-- ! -->

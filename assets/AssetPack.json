@@ -1,0 +1,153 @@
+{
+    "section1": {
+        "files": [
+            {
+                "url": [
+                    "assets/video/a hieu.mp4"
+                ],
+                "type": "video",
+                "key": "aHieu"
+            },
+            {
+                "url": "assets/images/a Lam.png",
+                "type": "image",
+                "key": "aLam"
+            },
+            {
+                "url": [
+                    "assets/audio/balloon-deflating.mp3"
+                ],
+                "type": "audio",
+                "key": "balloonDeflating"
+            },
+            {
+                "url": [
+                    "assets/audio/bonkmeme.mp3"
+                ],
+                "type": "audio",
+                "key": "bonkMeme"
+            },
+            {
+                "url": [
+                    "assets/audio/bubble-pop.mp3"
+                ],
+                "type": "audio",
+                "key": "bubblePop"
+            },
+            {
+                "url": "assets/images/cheems_bonk.png",
+                "type": "image",
+                "key": "cheemsBonk"
+            },
+            {
+                "url": [
+                    "assets/video/chold.mp4"
+                ],
+                "type": "video",
+                "key": "chold"
+            },
+            {
+                "url": [
+                    "assets/couin.mp3"
+                ],
+                "type": "audio",
+                "key": "couin"
+            },
+            {
+                "url": [
+                    "assets/video/Cypher Lam.mp4"
+                ],
+                "type": "video",
+                "key": "aLam_video"
+            },
+            {
+                "url": [
+                    "assets/audio/dau dau qua.mp3"
+                ],
+                "type": "audio",
+                "key": "dauDauQua"
+            },
+            {
+                "url": "assets/images/female.png",
+                "frameConfig": {
+                    "frameWidth": 32,
+                    "frameHeight": 32,
+                    "startFrame": 0,
+                    "endFrame": -1,
+                    "spacing": 0,
+                    "margin": 0
+                },
+                "type": "spritesheet",
+                "key": "female"
+            },
+            {
+                "url": [
+                    "assets/gta-san-andreas-ah-shit-here-we-go-again.mp3"
+                ],
+                "type": "audio",
+                "key": "gta-san-andreas-ah-shit-here-we-go-again"
+            },
+            {
+                "url": "assets/images/heart.png",
+                "type": "image",
+                "key": "heart"
+            },
+            {
+                "url": [
+                    "assets/video/hightbackground.mp4"
+                ],
+                "type": "video",
+                "key": "highBackground"
+            },
+            {
+                "url": "assets/images/Lantern Spritesheet.png",
+                "frameConfig": {
+                    "frameWidth": 32,
+                    "frameHeight": 32,
+                    "startFrame": 0,
+                    "endFrame": -1,
+                    "spacing": 0,
+                    "margin": 0
+                },
+                "type": "spritesheet",
+                "key": "Lantern Spritesheet"
+            },
+            {
+                "url": [
+                    "assets/lego-yoda-death-sound-effect.mp3"
+                ],
+                "type": "audio",
+                "key": "lego-yoda-death-sound-effect"
+            },
+            {
+                "url": "assets/images/Liem si.png",
+                "type": "image",
+                "key": "liemSi"
+            },
+            {
+                "url": [
+                    "assets/Mad_Hatter_Tea_Party.mp3"
+                ],
+                "type": "audio",
+                "key": "Mad_Hatter_Tea_Party"
+            },
+            {
+                "url": "assets/images/mask1.png",
+                "type": "image",
+                "key": "mask"
+            },
+            {
+                "url": "assets/images/RPG Nature Tileset.png",
+                "type": "image",
+                "key": "RPG Nature Tileset"
+            },
+            {
+                "url": [
+                    "assets/audio/the-white-stripes-poppy.mp3"
+                ],
+                "type": "audio",
+                "key": "the-white-stripes-poppy"
+            }
+        ]
+    }
+}

@@ -9,7 +9,7 @@ const config = {
     type: Phaser.AUTO,
     scene: [MainScene, MathGame],
     scale: {
-        zoom: 2,
+        zoom: 1,
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
     },
@@ -17,7 +17,7 @@ const config = {
         default: "matter",
         matter: {
             debug: true,
-            gravity: { y: 0 },
+            gravity: { y: 0.5 },
         },
     },
     pixelArt: true,
