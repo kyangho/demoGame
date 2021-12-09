@@ -78,7 +78,6 @@ export default class MainScene extends Phaser.Scene {
         );
 
         //load font
-        this.load.bitmapFont('bigFont', 'assets/font/bigFont.png', 'assets/font/bigFont.xml');
         
         this.load.video("aLam_video", "assets/video/Cypher Lam.mp4");
         this.load.image("aLam_image", "assets/images/a Lam.png");
