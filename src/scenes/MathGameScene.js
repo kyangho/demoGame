@@ -27,12 +27,6 @@ export default class MathGame extends Phaser.Scene{
     }
     
     create(){
-        // this.events.once("pause", () => {
-        //     console.log("shutdown")
-        //     isGameOver = false;
-        //     this.scene.restart();
-        // });
-        
         var marginLeft = 10;
         var gap = 10;
         var graphics = this.add.graphics();
@@ -204,7 +198,6 @@ export default class MathGame extends Phaser.Scene{
         this.setAnswers(this.generateAnswers(answerNumber));
         this.findCorrectAnswer(answerNumber)
         this.countdownTime(time);
-        console.log(answerNumber)
     }
 
     countdownTime(time){

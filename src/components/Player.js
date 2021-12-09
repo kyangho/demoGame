@@ -24,7 +24,6 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
             parts: [this.playerCollider, this.playerSensor],
             frictionAir: 0.35,
         });
-        console.log(this)
         this.setExistingBody(compoundBody);
         this.setFixedRotation();
         this.setCollisionCategory(2);
@@ -161,7 +160,9 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
                 Phaser.Input.Keyboard.KeyCodes.SHIFT
             ).isDown,
         };
-        if(this.state != "dead"){
+
+        if(this.state == "dead" || this.state == "wait"){
+        }else{
             this.movement(input);
             this.rolling(input);
             this.attack(input)
@@ -188,7 +189,6 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
         this.anims.pause(this.anims.currentAnim.frames[3]);
 
         this.deactiveBody()
-        console.log(this.body)
         var bouceTween = this.scene.tweens.add({
             targets: this,
             props:{
@@ -300,7 +300,6 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
             return;
         }
         this.state = "dead";
-        console.log(this.state)
         this.anims.play("player_idle_anims");
         this.anims.pause(this.anims.currentAnim.frames[2]);
         this.setActive(false);
@@ -625,7 +624,7 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
                 this.state = "revival";
                 this.setVisible(true);
                 this.setActive(true);
-                this.activeBody();
+                this.activeBody();  
                 this.scene.cameras.main.startFollow(this, false, 0.05, 0.05);
                 this.state = "idle";
                 this.x = spawnX;
@@ -635,5 +634,9 @@ export default class Player extends Phaser.Physics.Matter.Sprite {
                 });
             },
         });
+    }
+
+    setState(state){
+        this.state = state;
     }
 }

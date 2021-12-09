@@ -76,7 +76,6 @@ export default class NPC extends Phaser.Physics.Matter.Sprite{
             });
         });
         this.setInteractive().on('pointerdown', function(pointer, localX, localY, event){
-            console.log("dont touch me")
         });
 
     }

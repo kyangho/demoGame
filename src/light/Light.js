@@ -71,12 +71,14 @@ export default class Light extends Phaser.Physics.Matter.Sprite {
     }
 
     turnOff() {
+        this.light.setVisible(false);
         this.setActive(false);
         this.setVisible(false);
         state = "ACTIVE";
     }
 
     turnOn() {
+        this.light.setVisible(true);
         this.setActive(true);
         this.setVisible(true);
         state = "DISABLE";

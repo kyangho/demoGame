@@ -3,13 +3,9 @@ class PlayerData{
         this.score = 0;
         this.spawnXY = 
             {
-                x: 0,
-                y: 0
+                x: 100,
+                y: 100
             }
-        this.MathChallenge = {
-            score: 0,
-            passed: false,
-        }
     }
 
     setScore(score){
@@ -21,12 +17,6 @@ class PlayerData{
         this.spawnXY.y = y;
     }
 
-    setScore(score){
-        if (score >= 80){
-            this.MathChallenge.score = score;
-            this.MathChallenge.passed = true;
-        }
-    }
 }
 class SceneData{
     constructor(scene){
@@ -34,7 +24,7 @@ class SceneData{
         this.skyState = {
             night: {
                 id: 0,
-                duration: 5000,
+                duration: 7000,
                 r: 21 / 255,
                 g: 40 / 255,
                 b: 82 / 255,
@@ -48,7 +38,7 @@ class SceneData{
             },
             day: {
                 id: 2,
-                duration: 5000,
+                duration: 10000,
                 r: 200 / 255,
                 g: 200 / 255,
                 b: 200 / 255,
@@ -62,7 +52,7 @@ class SceneData{
             },
             sunset: {
                 id: 4,
-                duration: 5000,
+                duration: 3000,
                 r: 252 / 255,
                 g: 156 / 255,
                 b: 84 / 255,

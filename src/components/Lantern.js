@@ -65,4 +65,13 @@ export default class Lantern extends Phaser.Physics.Matter.Sprite {
         this.setVisible(true);
         state = "ACTIVE";
     }
+
+    turnOff(){
+        this.spotLight.turnOff();
+    }
+
+    turnOn(){
+        this.spotLight.turnOn();
+    }
+
 }

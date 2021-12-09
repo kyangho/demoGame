@@ -1,5 +1,7 @@
+import EndScene from "./scenes/EndScene.js";
 import MainScene from "./scenes/MainScene.js";
 import MathGame from "./scenes/MathGameScene.js";
+import MenuScene from "./scenes/MenuScene.js";
 import Sharing from "./scenes/Sharing.js";
 import TestScene from "./scenes/TestScene.js";
 const config = {
@@ -7,7 +9,7 @@ const config = {
     height: 340,
     backgroundColor: "#00000",
     type: Phaser.AUTO,
-    scene: [MainScene, MathGame],
+    scene: [MenuScene, MainScene, EndScene],
     scale: {
         zoom: 1,
         mode: Phaser.Scale.FIT,
@@ -16,7 +18,7 @@ const config = {
     physics: {
         default: "matter",
         matter: {
-            debug: true,
+            debug: false,
             gravity: { y: 0.5 },
         },
     },

@@ -20,11 +20,14 @@ var background;
 var midground;
 var coin;
 var trapLayer;
+var playerData;
 
+var bgSound;
 
+var a = 1;
 //DayLight Variable
 var skyState;
-
+var timeline;
 //depth layer
 const depthLayer = {
     background: -20,
@@ -79,11 +82,12 @@ export default class MainScene extends Phaser.Scene {
         
         this.load.video("aLam_video", "assets/video/Cypher Lam.mp4");
         this.load.image("aLam_image", "assets/images/a Lam.png");
+        this.load.audio("aLam_sound", "assets/audio/aLamSmile.mp3");
         this.load.video("highBackground", "assets/video/hightbackground.mp4");
         this.load.audio("headache", "assets/audio/dau dau qua.mp3");
         this.load.audio("balloonDeflating", "assets/audio/balloon-deflating.mp3");
         this.load.audio("balloonPop", "assets/audio/bubble-pop.mp3");
-
+        
         this.load.audio("cheemsBonk_audio", "assets/audio/bonkmeme.mp3");
         this.load.image("cheemsBonk_image", "assets/images/cheems_bonk.png");
         
@@ -94,10 +98,27 @@ export default class MainScene extends Phaser.Scene {
         
         this.load.image("peach", "assets/images/peach.png");
         this.load.image("key", "assets/images/key.png");
+        
+        this.load.video("aVu", "assets/video/ban a.mp4");
+        this.load.video("chold_end", "assets/video/ha noi co lanh.mp4");
+        this.load.video("binh", "assets/video/ve be ngoai khong quan trong.mp4");
+        this.load.video("quang", "assets/video/quang.mp4");
+        this.load.image("gift", "assets/images/gift.png");
+        
+        this.load.audio("bg_sound", "assets/audio/background.mp3");
+        this.load.image("sign1", "assets/images/sign1.png");
+        this.load.image("sign2", "assets/images/sign2.png");
+        this.load.image("sign3", "assets/images/sign3.png");
+        this.load.image("sign4", "assets/images/sign4.png");
+        this.load.image("sign5", "assets/images/sign5.png");
     }
     create() {
-    //load font
-        // this.add.bitmapText(100, 100, 'bigFont', 'Z123456789').setDepth(100);
+    //load bg sound
+        bgSound = this.sound.add("bg_sound", {
+            volume: 0.01,
+            loop: -1,
+        });
+        bgSound.play();
     //Load data
         var dataController = new DataController(this);
         skyState = dataController.sceneData.skyState;
@@ -105,19 +126,22 @@ export default class MainScene extends Phaser.Scene {
         this.loadMap();
     
         //Get input
-        inputController = new InputController(this);
+        if (inputController == null){
+            inputController = new InputController(this);
+        }
         this.inputKeys = inputController.getInputKeysDown();
 
     //load npc
     this.loadObjectNPC();
         
     //Init player
+        if (playerData == null){
+            playerData = dataController.playerData;
+        }
         this.player = new Player({
             scene: this,
-            // x: 97,
-            // y: 100,
-            x: 1874.385986840413,
-            y: 215.53530989584996,
+            x: playerData.spawnXY.x,
+            y: playerData.spawnXY.y,
         });
         this.player.inputKeys = this.inputKeys;
 
@@ -138,12 +162,13 @@ export default class MainScene extends Phaser.Scene {
         this.lantern.create(this.scene);
         this.lantern.setPipeline("Light2D");
         //Day night system
-        this.skyState = skyState.night;
-        this.lights.ambientColor = skyState.night;
+        // this.skyState = skyState.night;
+        // this.lights.ambientColor = skyState.night;
 
     //Create tweens Timeline
-        var timeline = dataController.sceneData.createTimelineSkyState();
-
+        if(timeline == null){
+            timeline = dataController.sceneData.createTimelineSkyState();
+        }
     //Last config
         this.lights.enable();
 
@@ -161,6 +186,8 @@ export default class MainScene extends Phaser.Scene {
         trapLayer.setPipeline("Light2D");
         coin.setPipeline("Light2D");
         midground.setPipeline("Light2D");
+
+        this.lights.addLight(-100, -100, 3000).setIntensity(1)
 
     //Cameras
         this.cameras.main.setScene(this);
@@ -181,16 +208,16 @@ export default class MainScene extends Phaser.Scene {
 
         this.player.collisionFilter = { group: CATEGORY_MIDGROUND }
         
-        this.input.on('pointerdown', (pointer) => {
-            this.player.setX(this.input.mousePointer.worldX);
-            this.player.setY(this.input.mousePointer.worldY);
-            console.log("mouse: " + this.input.mousePointer.worldX + ' ' + this.input.mousePointer.worldY);
-        }, this);
+        // this.input.on('pointerdown', (pointer) => {
+        //     this.player.setX(this.input.mousePointer.worldX);
+        //     this.player.setY(this.input.mousePointer.worldY);
+        //     console.log(this.input.mousePointer.worldX + ' ' + this.input.mousePointer.worldY);
+        // }, this);
         
         this.input.keyboard.on('keydown-' + 'R', () => {
+            this.sound.removeAll();
             this.scene.restart();
         })
-
     }
     
     update(time, delta) {
@@ -203,7 +230,6 @@ export default class MainScene extends Phaser.Scene {
 
 //================================================ANOTHER FUNCTION==================================================================
     loadMap(){
-        this.add.text(30, 30, "text").setText
         //create map
         map = this.make.tilemap({ key: "map" });
 
@@ -294,6 +320,11 @@ export default class MainScene extends Phaser.Scene {
         this.loadTrapFakeTexture();
         this.loadTrapGradient();
         this.loadTrapWalls();
+        this.loadTrapCollectKey();
+        this.loadChangeLight();
+        this.loadSpawnPoint();
+        this.loadEndPoint();
+        this.loadSign();
     }
 
     loadDeadArea(){
@@ -347,6 +378,18 @@ export default class MainScene extends Phaser.Scene {
                     }
                 })
             }
+            if (object.name == "aLam"){
+                var bodies = this.matter.add.rectangle(object.x + object.width / 2, object.y + object.height / 2, object.width, object.height, {
+                    isSensor: true,
+                    isStatic: true,
+                    label: "respawn_collide_default",
+                    onCollideCallback: (pair) => {
+                        if (pair.bodyA.label == "playerCollider" || pair.bodyB.label == "playerCollider"){
+                            this.player.dead();
+                        }
+                    }
+                })
+            }
         })
     }
 
@@ -374,7 +417,6 @@ export default class MainScene extends Phaser.Scene {
                                 }
                             }
                         }
-                        console.log(tilesBounce)
                         this.tweens.add({
                             targets: tilesBounce,
                             pixelY: function(target, targetKey, value, targetIndex, totalTargets, tween) { 
@@ -449,12 +491,11 @@ export default class MainScene extends Phaser.Scene {
                         onCollideCallback: (pair) => {
                             if (pair.bodyA.label == "playerCollider" || pair.bodyB.label == "playerCollider"){
                                 for (char = 60; char < 65; char++){
-                                    console.log(char)
                                     this.time.delayedCall(1000 * (char - 60), () => {
                                         trapDrop.objects.forEach(pointer => {
-                                            console.log("drop" + object.name.substring(6) + String.fromCharCode(char))
                                             if (pointer.name == ("drop" + object.name.substring(6) + String.fromCharCode(char))){
-                                                this.matter.add.image(pointer.x + pointer.width / 2, pointer.y + pointer.height / 2, "aLam_image", {}, {
+                                                this.sound.play("aLam_sound");
+                                                this.matter.add.image(pointer.x + pointer.width / 2, pointer.y + pointer.height / 2, "aLam_image", 0, {
                                                     isSensor: true,
                                                     label: "trapDrop",
                                                     ignoreGravity: false,
@@ -494,7 +535,8 @@ export default class MainScene extends Phaser.Scene {
                                 var pointB;
                                 trapAB.objects.forEach(collide => {
                                     if (collide.name == (object.name.substring(6) + "A")){
-                                        pointA = this.matter.add.image(collide.x, collide.y + collide.height / 2, "aLam_image", {}, {
+                                        this.sound.play("aLam_sound");
+                                        pointA = this.matter.add.image(collide.x, collide.y + collide.height / 2, "aLam_image", 0, {
                                             isSensor: true,
                                             ignoreGravity: true,
                                             onCollideCallback: (pair) => {
@@ -587,7 +629,8 @@ export default class MainScene extends Phaser.Scene {
                             if (pair.bodyA.label == "playerCollider" || pair.bodyB.label == "playerCollider"){
                                 trapDelayDisappear.objects.forEach(collide => {
                                     if (collide.name == ("position" + object.name.substring(6))){
-                                        var enemy =  this.matter.add.image(collide.x + collide.width / 2, collide.y + collide.height / 2, "aLam_image", {}, {
+                                        this.sound.play("aLam_sound");
+                                        var enemy =  this.matter.add.image(collide.x + collide.width / 2, collide.y + collide.height / 2, "aLam_image", 0, {
                                             isStatic: true,
                                             isSensor: true,
                                             onCollideActiveCallback: (pair) => {
@@ -625,11 +668,10 @@ export default class MainScene extends Phaser.Scene {
                             if (pair.bodyA.label == "playerCollider" || pair.bodyB.label == "playerCollider"){
                                 trapStatic.objects.forEach(collide => {
                                     if (collide.name == (object.name.substring(6) + "A")){
-                                        console.log(collide)
                                         if (collide.properties[0].value == "cheemsBonk_image"){
 
                                         }
-                                        var cheesm = this.matter.add.image(collide.x, collide.y + collide.height / 2, collide.properties[0].value, {}, {
+                                        var cheesm = this.matter.add.image(collide.x, collide.y + collide.height / 2, collide.properties[0].value, 0, {
                                             isSensor: true,
                                             ignoreGravity: true,
                                             onCollideCallback: (pair) => {
@@ -654,7 +696,7 @@ export default class MainScene extends Phaser.Scene {
         var trapFakeTexture = map.getObjectLayer("trapFakeTexture");
         trapFakeTexture.objects.forEach(object => {
             if (object.name == "active"){
-                var srcImage = this.matter.add.image(object.x + object.width / 2, object.y + object.height / 2, object.properties[1].value, {}, {
+                var srcImage = this.matter.add.image(object.x + object.width / 2, object.y + object.height / 2, object.properties[1].value, 0, {
                     isSensor: true,
                     isStatic: true,
                 })
@@ -665,7 +707,7 @@ export default class MainScene extends Phaser.Scene {
                     onCollideCallback: (pair) => {
                         if (pair.bodyA.label == "playerCollider" || pair.bodyB.label == "playerCollider"){
                             srcImage.destroy();
-                            srcImage = this.matter.add.image(object.x + object.width / 2, object.y + object.height / 2, object.properties[0].value, {}, {
+                            srcImage = this.matter.add.image(object.x + object.width / 2, object.y + object.height / 2, object.properties[0].value, 0, {
                                 isSensor: true,
                                 isStatic: true,
                             })
@@ -740,6 +782,7 @@ export default class MainScene extends Phaser.Scene {
                         label: "active",
                         onCollideCallback: (pair) => {
                             if (pair.bodyA.label == "playerCollider" || pair.bodyB.label == "playerCollider"){
+                                this.sound.play("aLam_sound")
                                 trapWalls.objects.forEach(childObject => {
                                     if (childObject.name == ("wall" + object.name.substring(6))){
                                         var image = this.matter.add.image(childObject.x, childObject.y, childObject.properties[0].value, 0, {
@@ -775,6 +818,7 @@ export default class MainScene extends Phaser.Scene {
                                                 x1 = childObject.x  + childObject.width * j / numberVertical;
                                                 y1 = childObject.y ;
                                             }
+                                            
                                             var childImage = this.matter.add.image(x1, y1, childObject.properties[0].value, 0, {
                                                 isSensor: true,
                                                 isStatic: true,
@@ -799,6 +843,215 @@ export default class MainScene extends Phaser.Scene {
         }
     }
 
+    loadTrapCollectKey(){
+        var trapCollectKey = map.getObjectLayer("trapCollectKey");
+        var gate;
+        var isGetMoveKey = false;
+        var isGetKey = false;
+        var moveKey;
+        var key;
+        trapCollectKey.objects.forEach(object => {
+            if(object.name == "gate"){
+                gate = this.matter.add.rectangle(object.x + object.width / 2, object.y + object.height / 2, object.width, object.height,{
+                    isSensor: false,
+                    isStatic: true,
+                    label: "gate",
+                })
+            }
+        })
+        trapCollectKey.objects.forEach(object => {
+            if(object.name == "moveKey"){
+                moveKey = this.matter.add.image(object.x + object.width / 2, object.y + object.height / 2, "key", 0, {
+                    isStatic: true,
+                    isSensor: true,
+                    onCollideCallback: (pair) => {
+                        if (pair.bodyA.label == "playerCollider" || pair.bodyB.label == "playerCollider"){
+                            isGetMoveKey = true;
+                            moveKey.destroy();
+                            if (isGetKey && isGetMoveKey){
+                                this.matter.world.remove(gate)
+                            }
+
+                        }
+                    }
+                })
+                var bodies = this.matter.add.rectangle(object.x + object.width / 2, object.y + object.height / 2, object.width, object.height,{
+                    isSensor: true,
+                    isStatic: true,
+                    label: "moveKey",
+                    onCollideCallback: (pair) => {
+                        if (pair.bodyA.label == "playerCollider" || pair.bodyB.label == "playerCollider"){
+                            this.matter.world.remove(bodies);
+                            this.matter.add.image(object.x + object.width / 2, object.y + object.height / 2, "cheemsBonk_image", 0, {
+                                isSensor: true,
+                                isStatic: true,
+                            }).setScale(0.2).setFlipX(true)
+                            var centerPoint = {
+                                x: object.x + object.width / 2,
+                                y: object.y + object.height / 2
+                            }
+                            if (this.player.x < centerPoint.x && this.player.y < centerPoint.y - object.height / 2){
+                                moveKey.setY(moveKey.y + 50);
+                            }
+                            if (this.player.x > centerPoint.x + object.width / 2 && this.player.y < centerPoint.y){
+                                moveKey.setX(moveKey.x - 50);
+                            }
+                            if (this.player.x > centerPoint.x - object.width / 2 && this.player.y > centerPoint.y ){
+                                moveKey.setY(moveKey.y - 50);
+                            }
+                            if (this.player.x < centerPoint.x  && this.player.y > centerPoint.y - object.height / 2){
+                                moveKey.setX(moveKey.x + 50);
+                            }
+                        }
+                        
+                    }
+                })
+            }
+        })
+        trapCollectKey.objects.forEach(object => {
+            if(object.name == "key"){
+                key = this.matter.add.image(object.x + object.width / 2, object.y + object.height / 2, "key", 0, {
+                    isSensor: false,
+                    isStatic: true,
+                    label: "key",
+                    onCollideCallback: (pair) => {
+                        if (pair.bodyA.label == "playerCollider" || pair.bodyB.label == "playerCollider"){
+                            isGetKey = true;
+                            key.destroy();
+                            if (isGetKey && isGetMoveKey){
+                                this.matter.world.remove(gate)
+                            }
+
+                        }
+                    }
+                })
+            }
+        })
+        
+    }
+
+    loadChangeLight(){
+        var changeLight = map.getObjectLayer("changeLight");
+        changeLight.objects.forEach(object => {
+            if(object.name == "turnOff"){
+                this.matter.add.rectangle(object.x + object.width / 2, object.y + object.height / 2, object.width, object.height, {
+                    isStatic: true,
+                    isSensor: true,
+                    onCollideCallback: (pair) => {
+                        timeline.pause();
+                        this.lights.ambientColor.r = 0;
+                        this.lights.ambientColor.g = 0;
+                        this.lights.ambientColor.b = 0;
+                    }
+                })
+            }
+            if(object.name == "turnOn"){
+                this.matter.add.rectangle(object.x + object.width / 2, object.y + object.height / 2, object.width, object.height, {
+                    isStatic: true,
+                    isSensor: true,
+                    onCollideCallback: () => {
+                        timeline.play();
+                    }
+                })
+            }
+        })
+    }
+    
+    loadSpawnPoint(){
+        var spawnPoint = map.getObjectLayer("spawnPoint");
+        spawnPoint.objects.forEach(object => {
+            if (object.name == "spawn"){
+                this.matter.add.rectangle(object.x + object.width / 2, object.y + object.height / 2, object.width, object.height, {
+                    isStatic: true,
+                    isSensor: true,
+                    onCollideCallback: (pair) => {
+                        if (pair.bodyA.label == "playerCollider" || pair.bodyB.label == "playerCollider"){
+                            playerData.setSpawnXY(object.x + object.width / 2, object.y + object.height / 2);
+                        }
+                    }
+                })
+            }
+        })
+    }
+
+    loadEndPoint(){
+        var endPoint = map.getObjectLayer("endPoint");
+        endPoint.objects.forEach(object => {
+            if (object.name == "aHieu"){
+                var gift1 = this.matter.add.image(object.x + object.width / 2, object.y + object.height / 2, "gift", 0, {
+                    isSensor: true,
+                    isStatic: true,
+                    onCollideCallback: (pair) => {
+                        if (pair.bodyA.label == "playerCollider" || pair.bodyB.label == "playerCollider"){
+                            this.player.deadByChimo();
+                        }
+                        
+                    }
+                }).setPipeline("Light2D")
+            }
+            if (object.name == "quang"){
+                var gift1 = this.matter.add.image(object.x + object.width / 2, object.y + object.height / 2, "gift", 0, {
+                    isSensor: true,
+                    isStatic: true,
+                    onCollideCallback: (pair) => {
+                        if (pair.bodyA.label == "playerCollider" || pair.bodyB.label == "playerCollider"){
+                            this.player.setState("wait");
+                            this.player.anims.play("player_idle_anims");
+                            this.player.setX(3088.74592016895 );
+                            this.player.setY(222.89013241982312);
+                            var video = this.add.video(3088.74592016895 - 80, 222.89013241982312 + 50, "quang").setScale(0.15).setOrigin(0.5, 1)
+                            video.play();
+                            this.cameras.main.stopFollow();
+                            this.tweens.add({
+                                targets: this.player,
+                                x: 3088.74592016895 - 80,
+                                y: 222.89013241982312 + 50,
+                                ease: "Linear",
+                                duration: 6000,
+                                onComplete: () => {
+                                    this.tweens.add({
+                                        targets: this.player,
+                                        alpha: 0,
+                                        ease: "Linear",
+                                        duration: 2000,
+                                    })
+                                }
+                            })
+                            video.once("complete", () => {
+                                playerData.setSpawnXY(100, 100);
+                                bgSound.destroy();
+                                this.scene.start("ENDSCENE");
+                                
+                            })
+                        }
+                    }
+                }).setPipeline("Light2D")
+            }
+            if (object.name == "aLam"){
+                var gift1 = this.matter.add.image(object.x + object.width / 2, object.y + object.height / 2, "gift", 0, {
+                    isSensor: true,
+                    isStatic: true,
+                    onCollideCallback: (pair) => {
+                        if (pair.bodyA.label == "playerCollider" || pair.bodyB.label == "playerCollider"){
+                            this.player.deadByLam();
+                        }
+                    }
+                }).setPipeline("Light2D")
+            }
+        })
+    }
+
+    loadSign(){
+        var sign = map.getObjectLayer("sign");
+        for (let i = 1; i <= 5; i++){
+            sign.objects.forEach(object => {
+                if (object.name == String(i)){
+                    this.add.image(object.x + object.width / 2, object.y + object.height / 2, "sign" + String(i)).setScale(0.3);
+                }
+            })
+        }
+    }
+
     swapDepth(){
         this.matter.world.on("collisionactive", (event, bodyA, bodyB) => {
             event.pairs.forEach(pair => {
@@ -818,6 +1071,8 @@ export default class MainScene extends Phaser.Scene {
         });
     }
 
+    
+
     getRootBody (body)
     {
         if (body.parent === body) { return body; }
@@ -832,8 +1087,4 @@ export default class MainScene extends Phaser.Scene {
         this.game.scene.remove(key);
         this.game.scene.add(key,  MathGame);
     }
-
-
-
-
 }
